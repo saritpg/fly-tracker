@@ -1,0 +1,340 @@
+function varargout = outputplot(varargin)
+% OUTPUTPLOT M-file for outputplot.fig
+%      OUTPUTPLOT, by itself, creates a new OUTPUTPLOT or raises the existing
+%      singleton*.
+%
+%      H = OUTPUTPLOT returns the handle to a new OUTPUTPLOT or the handle to
+%      the existing singleton*.
+%
+%      OUTPUTPLOT('CALLBACK',h,eventData,handles,...) calls the local
+%      function named CALLBACK in OUTPUTPLOT.M with the given input arguments.
+%
+%      OUTPUTPLOT('Property','Value',...) creates a new OUTPUTPLOT or raises the
+%      existing singleton*.  Starting from the left, property value pairs are
+%      applied to the GUI before outputplot_OpeningFunction gets called.  An
+%      unrecognized property name or invalid value makes property application
+%      stop.  All inputs are passed to outputplot_OpeningFcn via varargin.
+%
+%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
+%      instance to run (singleton)".
+%
+% See also: GUIDE, GUIDATA, GUIHANDLES
+
+% Edit the above text to modify the response to help outputplot
+
+% Last Modified by GUIDE v2.5 07-Feb-2003 15:09:30
+
+% Begin initialization code - DO NOT EDIT
+gui_Singleton = 1;
+gui_State = struct('gui_Name',       mfilename, ...
+                   'gui_Singleton',  gui_Singleton, ...
+                   'gui_OpeningFcn', @outputplot_OpeningFcn, ...
+                   'gui_OutputFcn',  @outputplot_OutputFcn, ...
+                   'gui_LayoutFcn',  [] , ...
+                   'gui_Callback',   []);
+if nargin & isstr(varargin{1})
+    gui_State.gui_Callback = str2func(varargin{1});
+end
+
+if nargout
+    [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
+else
+    gui_mainfcn(gui_State, varargin{:});
+end
+% End initialization code - DO NOT EDIT
+
+
+% --- Executes just before outputplot is made visible.
+function outputplot_OpeningFcn(h, eventdata, handles, varargin)
+% This function has no output args, see OutputFcn.
+% h    handle to figure
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% varargin   command line arguments to outputplot (see VARARGIN)
+
+% Choose default command line output for outputplot
+handles.output = h;
+if size(varargin)>0
+    handle_main=deal(varargin{1});
+    finaldisp=getfield(handle_main,'res');
+    outfilename=getfield(handle_main,'savefilename');
+    outpathname=getfield(handle_main,'savepathname');
+    
+    % Store it in the current handle
+    finaldisp_larv=finaldisp(find(finaldisp(:,1)),:);
+    handles.finaldisp_larv=finaldisp_larv;
+    handles.outfilename=outfilename;
+    handles.outpathname=outpathname;
+    handles.mainhandles=handle_main;
+    %handles.pathname=pathname;
+    set(findobj('tag','checkboxcurrent'),'Value',1);
+    %Ofilename=[handles.savefilename(:,1:end-4),'.dat'];
+    set(handles.edit2,'String',[outfilename]);
+    set(handles.text2,'String',[outpathname]);
+    set(handles.pushbuttonbrowse,'Enable','Off');
+    handles.datfilename=outfilename;
+    handles.datpathname=outpathname;
+else
+    set(findobj('Tag','checkboxother'),'Value',1);
+    set(findobj('Tag','checkboxcurrent'),'Enable','Off');
+end
+    % Update handles structure
+    
+    
+    
+guidata(h, handles);
+
+% UIWAIT makes outputplot wait for user response (see UIRESUME)
+% uiwait(handles.outputplot);
+
+
+% --- Outputs from this function are returned to the command line.
+function varargout = outputplot_OutputFcn(h, eventdata, handles)
+% varargout  cell array for returning output args (see VARARGOUT);
+% h    handle to figure
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Get default command line output from handles structure
+varargout{1} = handles.output;
+
+
+% --- Executes on button press in checkboxcurrent.
+function checkboxcurrent_Callback(h, eventdata, handles)
+if (get(h,'Value')==get(h,'Max'))
+    set(findobj('tag','checkboxother'),'Value',0.0);
+
+    %Ofilename=[handles.savefilename(:,1:end-4),'.dat'];
+    
+    pathname=handles.savepathname;
+    set(handles.edit2,'String',[handles.outfilename]);
+    set(handles.text2,'String',[handles.outpathname]);
+    set(handles.pushbuttonbrowse,'Enable','Off');
+else
+    set(handles.edit2,'String',' ');
+    set(handles.text2,'String',' ');
+    set(handles.pushbuttonbrowse,'Enable','Off');
+end
+% --- Executes on button press in checkboxother.
+function checkboxother_Callback(h, eventdata, handles)
+if (get(h,'Value')==get(h,'Max'))
+    set(findobj('tag','checkboxcurrent'),'Value',0.0);
+    set(handles.edit2,'String',' ');
+    set(handles.text2,'String',' ');
+    set(handles.pushbuttonbrowse,'Enable','On');
+else
+    set(handles.edit2,'String',' ');
+    set(handles.text2,'String',' ');
+    set(handles.pushbuttonbrowse,'Enable','Off');
+end
+% --- Executes during object creation, after setting all properties.
+function edit2_CreateFcn(h, eventdata, handles)
+% h    handle to edit2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc
+    set(h,'BackgroundColor','white');
+else
+    set(h,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
+end
+
+
+
+function edit2_Callback(h, eventdata, handles)
+% h    handle to edit2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(h,'String') returns contents of edit2 as text
+%        str2double(get(h,'String')) returns contents of edit2 as a double
+
+
+% --- Executes on button press in pushbuttonbrowse.
+function pushbuttonbrowse_Callback(h, eventdata, handles)
+% h    handle to pushbuttonbrowse (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+[filename,pathname]=uigetfile('*.dat','DataFile Selection');
+set(handles.edit2,'String',[filename]);
+set(handles.text2,'String',[pathname]);
+handles.datfilename=filename;
+handles.datpathname=pathname;
+guidata(h,handles);
+
+% --- Executes on button press in pushbuttonok.
+function pushbuttonok_Callback(h, eventdata, handles)
+% h    handle to pushbuttonok (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+if ~isfield(handles,'datfilename')|getfield(handles,'datfilename')==0;
+    msgbox('Enter the Output File','Error','error');
+    return
+end
+filename=getfield(handles,'datfilename');
+pathname=getfield(handles,'datpathname');
+
+%Store file contents into matrix
+[h, m]=hdrload([pathname,filename]);
+
+parSelArea=m(1:3,end-1);
+parSelArea1=m(1:3,end-2);
+parSelArea2=m(1:3,end-3);
+samplingVar=m(4:7,end-1);
+figure,plot(m(:,1:2:end-4),m(:,2:2:end-4));
+grid on;
+
+lineobject=findobj('type','line');
+set(lineobject,'linewidth',2);
+set(gcf,'Name',['Tracks of ' [filename]]);
+axis([0 720 0 576]);
+coodvalue;
+
+
+xCenter=parSelArea(1);
+yCenter=parSelArea(2);
+xodour1=parSelArea1(1);
+yodour1=parSelArea1(2);
+xodour2=parSelArea2(1);
+yodour2=parSelArea2(2);
+
+x=m(:,1:2:end-4);
+xMax=max(x);
+xMin=min(x);
+start=50;
+xNorm=[];
+
+yNorm=m(:,2:2:end-4);
+
+diff=0;
+count=1;
+xorigin=[];
+yorigin=[];
+xx=[];
+yy=[];
+flag=0;
+j=0;
+radius=floor(55/0.186); %   mm to pixel conversion
+theta=linspace(0,2*pi,radius*4);
+xj=radius.*sin(theta);
+yj=radius.*cos(theta);
+xi=xj+xCenter;
+yi=yj+yCenter;
+
+%----odour zones----%
+aradius=floor(24/0.186); 
+atheta=linspace(0,pi,aradius*4);
+axj=aradius.*sin(atheta);
+ayj=aradius.*cos(atheta);
+axi=axj+xodour1;
+ayi=ayj+yodour1;
+
+bradius=floor(24/0.186); 
+btheta=linspace(0,-pi,bradius*4);
+bxj=bradius.*sin(btheta);
+byj=bradius.*cos(btheta);
+bxi=bxj+xodour2;
+byi=byj+yodour2;
+
+%plot(xi,yi,'b')
+for i=1:length(xMax)
+    
+    origin=start+xCenter;
+    xorigin=[xorigin origin];
+    yorigin=[yorigin 0];
+    diff=xCenter-origin;
+    
+    xNormTmp=x(:,i);
+    
+    xNorm=[xNorm xNormTmp];
+    points=[];
+    
+    flag=flag+1;
+    start=start+720;
+    if mod(i,8)==0 ||length(xMax)==i
+        yNormTmp=yNorm(:,count:i);    
+        figure
+        %pixval on;
+        for k=1:flag
+            j=j+1;
+            subplot(3,3,k);%changed from 2X4 to 3X3
+
+
+%             figure(findobj('Tag','mainfig'));
+            %k
+            ab=[xNorm(1,k)   yNormTmp(1,k)
+                xNorm(end,k) yNormTmp(end,k)];
+            %xNorm
+            %yNormTmp
+            
+           
+            hplot=plot(xNorm(:,k),yNormTmp(:,k),'b-',xNorm(end,k),yNormTmp(end,k),'r+',ab(:,1),ab(:,2),'r-',xCenter,yCenter,'ro',xodour1,yodour1,'bo',xodour2,yodour2,'bo',xNorm(1,k),yNormTmp(1,k),'g+',axi,ayi,'b',bxi,byi,'b',xi,yi,'k');
+            %points=[points xNorm(1,k) yNormTmp(1,k) xNorm(end,k) yNormTmp(end,k)]
+            
+            %points=reshape(points,:,2)
+            axis([0 720 0 576]);
+%             coodvalue_subplot;
+            lineobject=findobj('type','line');
+            set(lineobject,'linewidth',2);
+            title([[filename(:,1:end-10)],' No.',num2str(j)]);
+            
+            grid on;
+        end
+        %points=reshape(points,k,4)
+        coodvalue_subplot;
+        set(gcf,'Name',['Tracks of ' [filename]]);
+        h=legend(hplot,'Tracks','stop','Mean free path','Center','odour wells','odourzones','start',0);
+        hold on;
+        drawnow
+        xNorm=[];
+        yNormTmp=[];
+        start=50;
+        count=i+1;
+        xorigin=[];
+        yorigin=[];
+        xx=[];
+        yy=[];
+        flag=0;
+    end
+    
+    diff=0;
+end
+   close(outputplot);
+
+%lineobject=findobj('type','line');
+%set(lineobject,'linewidth',2);
+%set(gcf,'Name',['Tracks of ' [filename]]);
+
+
+
+% --- Executes on button press in pushbuttoncancel.
+function pushbuttoncancel_Callback(h, eventdata, handles)
+% h   handle to pushbuttoncancel (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+close(outputplot);
+
+% --- Executes on button press in pushbuttonclose.
+function pushbuttonclose_Callback(h, eventdata, handles)
+% h   handle to pushbuttonclose (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+close(outputplot);
+
+
+% --- Executes during object deletion, before destroying properties.
+function outputplot_DeleteFcn(h, eventdata, handles)
+% h  handle to outputplot (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes during object deletion, before destroying properties.
+function Outputplot_DeleteFcn(hObject, eventdata, handles)
+% hObject    handle to Outputplot (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+

@@ -1,0 +1,624 @@
+function varargout = trackProperties(varargin)
+% TRACKPROPERTIES M-file for trackProperties.fig
+%      TRACKPROPERTIES, by itself, creates a new TRACKPROPERTIES or raises the existing
+%      singleton*.
+%
+%      H = TRACKPROPERTIES returns the handle to a new TRACKPROPERTIES or the handle to
+%      the existing singleton*.
+%
+%      TRACKPROPERTIES('CALLBACK',h,eventData,handles,...) calls the local
+%      function named CALLBACK in TRACKPROPERTIES.M with the given input arguments.
+%
+%      TRACKPROPERTIES('Property','Value',...) creates a new TRACKPROPERTIES or raises the
+%      existing singleton*.  Starting from the left, property value pairs are
+%      applied to the GUI before trackProperties_OpeningFunction gets called.  An
+%      unrecognized property name or invalid value makes property application
+%      stop.  All inputs are passed to trackProperties_OpeningFcn via varargin.
+%
+%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
+%      instance to run (singleton)".
+%
+% See also: GUIDE, GUIDATA, GUIHANDLES
+
+% Edit the above text to modify the response to help trackProperties
+
+% Last Modified by GUIDE v2.5 08-Apr-2003 15:32:32
+
+% Begin initialization code - DO NOT EDIT
+gui_Singleton = 1;
+gui_State = struct('gui_Name',       mfilename, ...
+                   'gui_Singleton',  gui_Singleton, ...
+                   'gui_OpeningFcn', @trackProperties_OpeningFcn, ...
+                   'gui_OutputFcn',  @trackProperties_OutputFcn, ...
+                   'gui_LayoutFcn',  [] , ...
+                   'gui_Callback',   []);
+if nargin & isstr(varargin{1})
+    gui_State.gui_Callback = str2func(varargin{1});
+end
+
+if nargout
+    [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
+else
+    gui_mainfcn(gui_State, varargin{:});
+end
+% End initialization code - DO NOT EDIT
+
+
+% --- Executes just before trackProperties is made visible.
+function trackProperties_OpeningFcn(h, eventdata, handles, varargin)
+% This function has no output args, see OutputFcn.
+% h    handle to figure
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% varargin   command line arguments to trackProperties (see VARARGIN)
+
+% Choose default command line output for trackProperties
+handles.output = h;
+if size(varargin)>0
+    handle_main=deal(varargin{1});
+    finaldisp=getfield(handle_main,'res');
+    outfilename=getfield(handle_main,'savefilename');
+    outpathname=getfield(handle_main,'savepathname');
+    
+    % Store it in the current handle
+    finaldisp_larv=finaldisp(find(finaldisp(:,1)),:);
+    handles.finaldisp_larv=finaldisp_larv;
+    handles.outfilename=outfilename;
+    handles.outpathname=outpathname;
+    handles.mainhandles=handle_main;
+    %handles.pathname=pathname;
+    set(findobj('tag','checkboxcurrent'),'Value',1);
+    %Ofilename=[handles.savefilename(:,1:end-4),'.dat'];
+    set(handles.edit1,'String',[outfilename]);
+    set(handles.text8,'String',[outpathname]);
+    set(handles.pushbuttonbrowse,'Enable','Off');
+    handles.datfilename=outfilename;
+    handles.datpathname=outpathname;
+else
+    set(findobj('Tag','checkboxother'),'Value',1);
+    set(findobj('Tag','checkboxcurrent'),'Enable','Off');
+end
+set(findobj('Tag','checkboxalltracks'),'Value',1);
+set(findobj('tag','checkboxsingletrack'),'Value',0.0);
+set(findobj('tag','checkboxBtnPoints'),'Value',0.0);
+set(handles.textTrackNo,'Visible','Off');
+set(handles.textInitial,'Visible','Off');
+set(handles.textFinal,'Visible','Off');
+set(handles.editTrackNo,'Visible','Off');
+set(handles.editInitialx,'Visible','Off');
+set(handles.editInitialy,'Visible','Off');
+set(handles.editFinalx,'Visible','Off');
+set(handles.editFinaly,'Visible','Off');
+% Update handles structure
+guidata(h, handles);
+
+% UIWAIT makes trackProperties wait for user response (see UIRESUME)
+% uiwait(handles.figure1);
+
+
+% --- Outputs from this function are returned to the command line.
+function varargout = trackProperties_OutputFcn(h, eventdata, handles)
+% varargout  cell array for returning output args (see VARARGOUT);
+% h    handle to figure
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Get default command line output from handles structure
+varargout{1} = handles.output;
+
+
+% --- Executes on button press in checkboxcurrent.
+function checkboxcurrent_Callback(h, eventdata, handles)
+if (get(h,'Value')==get(h,'Max'))
+    set(findobj('tag','checkboxother'),'Value',0.0);
+
+    %Ofilename=[handles.savefilename(:,1:end-4),'.dat'];
+    
+    pathname=handles.savepathname;
+    set(handles.edit1,'String',[handles.outfilename]);
+    set(handles.text8,'String',[handles.outpathname]);
+    set(handles.pushbuttonbrowse,'Enable','Off');
+else
+    set(handles.edit1,'String',' ');
+    set(handles.text8,'String',' ');
+    set(handles.pushbuttonbrowse,'Enable','Off');
+end
+
+% --- Executes on button press in checkboxother.
+function checkboxother_Callback(h, eventdata, handles)
+if (get(h,'Value')==get(h,'Max'))
+    set(findobj('tag','checkboxcurrent'),'Value',0.0);
+    set(handles.edit1,'String',' ');
+    set(handles.text8,'String',' ');
+    set(handles.pushbuttonbrowse,'Enable','On');
+else
+    set(handles.edit1,'String',' ');
+    set(handles.text8,'String',' ');
+    set(handles.pushbuttonbrowse,'Enable','Off');
+end
+
+% --- Executes during object creation, after setting all properties.
+
+function edit1_CreateFcn(h, eventdata, handles)
+% h    handle to edit1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc
+    set(h,'BackgroundColor','white');
+else
+    set(h,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
+end
+
+
+
+function edit1_Callback(h, eventdata, handles)
+% h    handle to edit1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(h,'String') returns contents of edit1 as text
+%        str2double(get(h,'String')) returns contents of edit1 as a double
+
+
+% --- Executes on button press in pushbuttonbrowse.
+function pushbuttonbrowse_Callback(h, eventdata, handles)
+[filename,pathname]=uigetfile('*.dat','DataFile Selection');
+set(handles.edit1,'String',[filename]);
+set(handles.text8,'String',[pathname]);
+handles.datfilename=filename;
+handles.datpathname=pathname;
+guidata(h,handles);
+
+
+% --- Executes on button press in pushbuttonok.
+function pushbuttonok_Callback(h, eventdata, handles)
+
+if ~isfield(handles,'datfilename')|getfield(handles,'datfilename')==0;
+    msgbox('Enter the Output File','Error','error');
+    return
+end
+filename=getfield(handles,'datfilename');
+pathname=getfield(handles,'datpathname');
+
+%To find the velocity of the tracks
+if get(findobj('tag','checkboxalltracks'),'Value')==1
+    action=1;
+
+    elseif get(findobj('tag','checkboxsingletrack'),'Value')==1
+            action=2;
+
+    elseif get(findobj('tag','checkboxBtnPoints'),'Value')==1
+            action=3;
+    else
+            action=4;
+end
+
+        
+
+%Store file contents into matrix
+[h, m]=hdrload([pathname,filename]);
+
+Center=m(1:3,end-1);
+spec_xo=Center(1);
+spec_yo=Center(2);
+spec_radius=floor(5/0.186);
+theta=linspace(0,2*pi,spec_radius*4);
+spec_x=spec_radius.*sin(theta);
+spec_y=spec_radius.*cos(theta);
+spec_xi=spec_x+spec_xo;
+spec_yi=spec_y+spec_yo;
+spec_area=[spec_xi;spec_yi];
+samplingVar=m(4:7,end-1);
+Start=samplingVar(1);
+Endat=samplingVar(2);
+skip=samplingVar(3);
+samplingRate=samplingVar(4);
+Sampling1Sec=samplingRate/skip;
+NoFrms2Sec=Sampling1Sec*2;
+Frames=m(1:NoFrms2Sec:end,1:end-2);
+if ~isequal(mod((length(m(:,1))),NoFrms2Sec),0)
+    Frames=[Frames;m(end,1:end-2)];
+end
+Distance=[];
+Time=[];
+Velocity=[];
+diffusionThreshold=[];
+%To Find the Velocity for all the Tracks
+if action==1
+    for j=1:2:length(Frames(1,:))
+        trackDist=0;
+        trackTime=0;
+        trackVelocity=0;
+        NoOfFrames=0;
+        for i=1:length(Frames(:,1))-1
+            distFrm1Origin=sqrt((Frames(i,j)-spec_xo)^2+(Frames(i,j+1)-spec_yo)^2);
+            distFrm2Origin=sqrt((Frames(i+1,j)-spec_xo)^2+(Frames(i+1,j+1)-spec_yo)^2);
+            if distFrm2Origin<spec_radius & distFrm1Origin > spec_radius
+                distBtnFrms=sqrt((Frames(i,j)-Frames(i+1,j))^2+(Frames(i,j+1)-Frames(i+1,j+1))^2);
+                trackDist=trackDist+distBtnFrms;
+                NoOfFrames=i*NoFrms2Sec*skip;
+                if i==length(Frames(:,1))-1
+                     NoOfFrames=Endat;
+                end
+                break;
+            end
+            distBtnFrms=sqrt((Frames(i,j)-Frames(i+1,j))^2+(Frames(i,j+1)-Frames(i+1,j+1))^2);
+            if ~isequal(distBtnFrms,0)
+                trackDist=trackDist+distBtnFrms;
+                NoOfFrames=i*NoFrms2Sec*skip;
+                if i==length(Frames(:,1))-1
+                    NoOfFrames=Endat;
+                end
+            end
+        end
+        trackTime=NoOfFrames/samplingRate;
+        distanceInmm=trackDist*0.186;
+        trackVelocity=distanceInmm/trackTime;
+        Distance=[Distance;distanceInmm];
+        Time=[Time;trackTime];
+        Velocity=[Velocity;trackVelocity];
+        distDiff=sqrt((m(:,j)-spec_xo).^2+(m(:,j+1)-spec_yo).^2);
+        diffThreshold=max(distDiff);
+        diffThresholdInmm=diffThreshold*0.186;
+        diffusionThreshold=[diffusionThreshold;diffThresholdInmm];
+    end
+    result=[];
+    fm=[];
+    result=[1:length(Frames(1,:))/2]';
+    fm=[fm '%12d '];
+    result=[result Distance];
+    fm=[fm '%12.6f '];
+    result=[result Time];
+    fm=[fm '%12.6f '];
+    result=[result Velocity];
+    fm=[fm '%12.6f '];
+    result=[result diffusionThreshold];
+    fm=[fm '%12.6f '];
+    fm=[fm(1,1:end-1),'\n'];
+    meanDistance=mean(Distance);
+    meanVelocity=mean(Velocity);
+    meanTime=mean(Time);
+    msgbox(['Mean Distance =',num2str(meanDistance),'mm','           Mean Time=',num2str(meanTime),'sec','               Mean Velocity=',num2str(meanVelocity),'mm/sec']);% meanDistance meanTime meanVelocity]);
+    result=[result;length(Frames(1,:))/2+1,meanDistance,meanTime,meanVelocity,0];
+    %Find Diffusion Threshold
+  
+    fid=fopen([pathname,filename(:,1:end-4),'_prop','.dat'],'w');
+    fprintf(fid,fm,result');
+    fclose(fid);
+end
+
+if action==2
+       trackNo=str2num(get(findobj('tag','editTrackNo'),'String'));
+       if isequal(trackNo,[])|trackNo==0
+           msgbox('Enter the Track Number','Error','error');
+           return
+       end
+        j=(trackNo-1)*2+1;
+        trackDist=0;
+        trackTime=0;
+        trackVelocity=0;
+        NoOfFrames=0;
+        for i=1:length(Frames(:,1))-1
+            distFrm1Origin=sqrt((Frames(i,j)-spec_xo)^2+(Frames(i,j+1)-spec_yo)^2);
+            distFrm2Origin=sqrt((Frames(i+1,j)-spec_xo)^2+(Frames(i+1,j+1)-spec_yo)^2);
+            if distFrm2Origin<spec_radius & distFrm1Origin > spec_radius
+                distBtnFrms=sqrt((Frames(i,j)-Frames(i+1,j))^2+(Frames(i,j+1)-Frames(i+1,j+1))^2);
+                trackDist=trackDist+distBtnFrms;
+                NoOfFrames=i*NoFrms2Sec*skip;
+                if i==length(Frames(:,1))-1
+                     NoOfFrames=Endat;
+                end
+                break;
+            end
+            distBtnFrms=sqrt((Frames(i,j)-Frames(i+1,j))^2+(Frames(i,j+1)-Frames(i+1,j+1))^2);
+            if ~isequal(distBtnFrms,0)
+                trackDist=trackDist+distBtnFrms;
+                NoOfFrames=i*NoFrms2Sec*skip;
+                if i==length(Frames(:,1))-1
+                    NoOfFrames=Endat;
+                end
+            end
+        end
+        trackTime=NoOfFrames/samplingRate;
+        distanceInmm=trackDist*0.186;
+        trackVelocity=distanceInmm/trackTime;
+        Distance=[Distance;distanceInmm];
+        Time=[Time;trackTime];
+        Velocity=[Velocity;trackVelocity];
+        distDiff=sqrt((m(:,j)-spec_xo).^2+(m(:,j+1)-spec_yo).^2);
+        diffThreshold=max(distDiff);
+        diffThresholdInmm=diffThreshold*0.186;
+        diffusionThreshold=[diffusionThreshold;diffThresholdInmm];
+   
+    result=[];
+    fm=[];
+    result=[trackNo];
+    fm=[fm '%12d '];
+    result=[result Distance];
+    fm=[fm '%12.6f '];
+    result=[result Time];
+    fm=[fm '%12.6f '];
+    result=[result Velocity];
+    fm=[fm '%12.6f '];
+    result=[result diffusionThreshold];
+    fm=[fm '%12.6f '];
+    fm=[fm(1,1:end-1),'\n'];
+    meanDistance=mean(Distance);
+    meanVelocity=mean(Velocity);
+    meanTime=mean(Time);
+    msgbox(['TrackNo=',num2str(trackNo),'      Distance =',num2str(meanDistance),'mm','            Time=',num2str(meanTime),'sec','                Velocity=',num2str(meanVelocity),'mm/sec'] );% meanDistance meanTime meanVelocity]);
+    %result=[result;length(Frames(1,:))/2+1,meanDistance,meanTime,meanVelocity];
+    fid=fopen([pathname,filename(:,1:end-4),'_prop',num2str(trackNo),'.dat'],'w');
+    fprintf(fid,fm,result');
+    fclose(fid);
+end
+
+
+if action==3
+    trackNo=str2num(get(findobj('tag','editTrackNo'),'String'));
+    initialx=str2num(get(findobj('tag','editInitialx'),'String'));
+    initialy=str2num(get(findobj('tag','editInitialy'),'String'));
+    finalx=str2num(get(findobj('tag','editFinalx'),'String'));
+    finaly=str2num(get(findobj('tag','editFinaly'),'String'));
+    if isequal(trackNo,[])|trackNo==0
+           msgbox('Enter the Track Number ','Error','error');
+           return
+    end
+    if isequal(initialx,[])|isequal(initialy,[])|initialx==0|initialy==0
+        msgbox('Enter the Initial X Y Values ','Error','error');
+        return
+    end
+    if isequal(finalx,[])|isequal(finaly,[])|finalx==0|finaly==0
+        msgbox('Enter the Final X Y Values ','Error','error');
+        return
+    end
+    j=(trackNo-1)*2+1;
+    initial=sqrt((m(:,j)-initialx).^2+(m(:,j+1)-initialy).^2);
+    final=sqrt((m(:,j)-finalx).^2+(m(:,j+1)-finaly).^2);
+    minInitial=min(initial);
+    minFinal=min(final);
+    initialxy=find(initial==minInitial);
+    finalxy=find(final==minFinal);
+    % if initial point is after final point swap them
+    if initialxy>finalxy
+        temp=initialxy;
+        initialxy=finalxy;
+        finalxy=temp;
+    end
+    Frames=m(initialxy:NoFrms2Sec:finalxy,j:j+1);
+    if ~isequal(mod((length(m(initialxy,j))),NoFrms2Sec),0)
+        Frames=[Frames;m(finalxy,j:j+1)];
+    end
+    
+        trackDist=0;
+        trackTime=0;
+        trackVelocity=0;
+        NoOfFrames=0;
+        j=1;
+        for i=1:length(Frames(:,1))-1
+            distFrm1Origin=sqrt((Frames(i,j)-spec_xo)^2+(Frames(i,j+1)-spec_yo)^2);
+            distFrm2Origin=sqrt((Frames(i+1,j)-spec_xo)^2+(Frames(i+1,j+1)-spec_yo)^2);
+            if distFrm2Origin<spec_radius & distFrm1Origin > spec_radius
+                distBtnFrms=sqrt((Frames(i,j)-Frames(i+1,j))^2+(Frames(i,j+1)-Frames(i+1,j+1))^2);
+                trackDist=trackDist+distBtnFrms;
+                NoOfFrames=i*NoFrms2Sec*skip;
+                if i==length(Frames(:,1))-1
+                     NoOfFrames=Endat;
+                end
+                break;
+            end
+            distBtnFrms=sqrt((Frames(i,j)-Frames(i+1,j))^2+(Frames(i,j+1)-Frames(i+1,j+1))^2);
+            if ~isequal(distBtnFrms,0)
+                trackDist=trackDist+distBtnFrms;
+                NoOfFrames=i*NoFrms2Sec*skip;
+                if i==length(Frames(:,1))-1
+                    NoOfFrames=finalxy*skip;
+                end
+            end
+        end
+        trackTime=NoOfFrames/samplingRate;
+        distanceInmm=trackDist*0.186;
+        trackVelocity=distanceInmm/trackTime;
+        Distance=[Distance;distanceInmm];
+        Time=[Time;trackTime];
+        Velocity=[Velocity;trackVelocity];
+   
+    result=[];
+    fm=[];
+    result=[trackNo];
+    fm=[fm '%12d '];
+    result=[result Distance];
+    fm=[fm '%12.6f '];
+    result=[result Time];
+    fm=[fm '%12.6f '];
+    result=[result Velocity];
+    fm=[fm '%12.6f '];
+    fm=[fm(1,1:end-1),'\n'];
+    meanDistance=mean(Distance);
+    meanVelocity=mean(Velocity);
+    meanTime=mean(Time);
+    msgbox(['TrackNo=',num2str(trackNo),'      Distance =',num2str(meanDistance),'mm','            Time=',num2str(meanTime),'sec','                Velocity=',num2str(meanVelocity),'mm/sec'] );% meanDistance meanTime meanVelocity]);
+    result=[result;initialx,initialy,finalx,finaly];
+    fid=fopen([pathname,filename(:,1:end-4),'_propBtnPts',num2str(trackNo),'.dat'],'w');
+    fprintf(fid,fm,result');
+    fclose(fid);
+end
+
+if action==4
+    msgbox('Tick the Checkbox to find the Properties','Error','error');
+    return
+end
+
+close(trackProperties);
+
+
+% --- Executes on button press in pushbuttoncancel.
+function pushbuttoncancel_Callback(h, eventdata, handles)
+close(trackProperties);
+
+function pushbuttonclose_Callback(h, eventdata, handles)
+close(trackProperties);
+
+
+% --- Executes on button press in checkboxalltracks.
+function checkboxalltracks_Callback(h, eventdata, handles)
+if (get(h,'Value')==get(h,'Max'))
+    set(findobj('tag','checkboxsingletrack'),'Value',0.0);
+    set(findobj('tag','checkboxBtnPoints'),'Value',0.0);
+    set(handles.textTrackNo,'Visible','Off');
+    set(handles.textInitial,'Visible','Off');
+    set(handles.textFinal,'Visible','Off');
+    set(handles.editTrackNo,'Visible','Off');
+    set(handles.editInitialx,'Visible','Off');
+    set(handles.editInitialy,'Visible','Off');
+    set(handles.editFinalx,'Visible','Off');
+    set(handles.editFinaly,'Visible','Off');
+end
+% --- Executes on button press in checkboxsingletrack.
+function checkboxsingletrack_Callback(h, eventdata, handles)
+if (get(h,'Value')==get(h,'Max'))
+    set(handles.textTrackNo,'Visible','On');
+    set(handles.textInitial,'Visible','Off');
+    set(handles.textFinal,'Visible','Off');
+    set(findobj('tag','checkboxalltracks'),'Value',0.0);
+    set(findobj('tag','checkboxBtnPoints'),'Value',0.0);
+    set(handles.editTrackNo,'Visible','On');
+    set(handles.editInitialx,'Visible','Off');
+    set(handles.editInitialy,'Visible','Off');
+    set(handles.editFinalx,'Visible','Off');
+    set(handles.editFinaly,'Visible','Off');
+end
+
+
+% --- Executes on button press in checkboxBtnPoints.
+function checkboxBtnPoints_Callback(h, eventdata, handles)
+
+if (get(h,'Value')==get(h,'Max'))
+    set(handles.textTrackNo,'Visible','On');
+    set(handles.textInitial,'Visible','On');
+    set(handles.textFinal,'Visible','On');
+    set(findobj('tag','checkboxsingletrack'),'Value',0.0);
+    set(findobj('tag','checkboxalltracks'),'Value',0.0);
+    set(handles.editTrackNo,'Visible','On');
+    set(handles.editInitialx,'Visible','On');
+    set(handles.editInitialy,'Visible','On');
+    set(handles.editFinalx,'Visible','On');
+    set(handles.editFinaly,'Visible','On');
+end
+
+% --- Executes during object creation, after setting all properties.
+function editTrackNo_CreateFcn(h, eventdata, handles)
+%       See ISPC and COMPUTER.
+if ispc
+    set(h,'BackgroundColor','white');
+else
+    set(h,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
+end
+
+
+
+function editTrackNo_Callback(h, eventdata, handles)
+
+% Hints: get(h,'String') returns contents of editTrackNo as text
+%        str2double(get(h,'String')) returns contents of editTrackNo as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function editInitialX_CreateFcn(h, eventdata, handles)
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc
+    set(h,'BackgroundColor','white');
+else
+    set(h,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
+end
+
+
+
+function editInitialX_Callback(h, eventdata, handles)
+
+% Hints: get(h,'String') returns contents of editInitialX as text
+%        str2double(get(h,'String')) returns contents of editInitialX as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function editInitialy_CreateFcn(h, eventdata, handles)
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc
+    set(h,'BackgroundColor','white');
+else
+    set(h,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
+end
+
+
+
+function editInitialy_Callback(h, eventdata, handles)
+
+% Hints: get(h,'String') returns contents of editInitialy as text
+%        str2double(get(h,'String')) returns contents of editInitialy as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function editFinalx_CreateFcn(h, eventdata, handles)
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc
+    set(h,'BackgroundColor','white');
+else
+    set(h,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
+end
+
+
+
+function editFinalx_Callback(h, eventdata, handles)
+
+% Hints: get(h,'String') returns contents of editFinalx as text
+%        str2double(get(h,'String')) returns contents of editFinalx as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function editFinaly_CreateFcn(h, eventdata, handles)
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc
+    set(h,'BackgroundColor','white');
+else
+    set(h,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
+end
+
+
+
+function editFinaly_Callback(h, eventdata, handles)
+
+% Hints: get(h,'String') returns contents of editFinaly as text
+%        str2double(get(h,'String')) returns contents of editFinaly as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function editInitialx_CreateFcn(h, eventdata, handles)
+
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc
+    set(h,'BackgroundColor','white');
+else
+    set(h,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
+end
+
+
+
+function editInitialx_Callback(h, eventdata, handles)
+
+% Hints: get(h,'String') returns contents of editInitialx as text
+%        str2double(get(h,'String')) returns contents of editInitialx as a double
+
+

@@ -1,0 +1,163 @@
+function varargout = Browse(varargin)
+% BROWSE M-file for Browse.fig
+%      BROWSE, by itself, creates a new BROWSE or raises the existing
+%      singleton*.
+%
+%      H = BROWSE returns the handle to a new BROWSE or the handle to
+%      the existing singleton*.
+%
+%      BROWSE('CALLBACK',h,eventData,handles,...) calls the local
+%      function named CALLBACK in BROWSE.M with the given input arguments.
+%
+%      BROWSE('Property','Value',...) creates a new BROWSE or raises the
+%      existing singleton*.  Starting from the left, property value pairs are
+%      applied to the GUI before Browse_OpeningFunction gets called.  An
+%      unrecognized property name or invalid value makes property application
+%      stop.  All inputs are passed to Browse_OpeningFcn via varargin.
+%
+%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
+%      instance to run (singleton)".
+%
+% See also: GUIDE, GUIDATA, GUIHANDLES
+
+% Edit the above text to modify the response to help Browse
+
+% Last Modified by Veeresh Neginhal on 6-1-2003
+% Begin initialization code - DO NOT EDIT
+gui_Singleton = 1;
+gui_State = struct('gui_Name',       mfilename, ...
+                   'gui_Singleton',  gui_Singleton, ...
+                   'gui_OpeningFcn', @Browse_OpeningFcn, ...
+                   'gui_OutputFcn',  @Browse_OutputFcn, ...
+                   'gui_LayoutFcn',  [] , ...
+                   'gui_Callback',   []);
+if nargin & isstr(varargin{1})
+    gui_State.gui_Callback = str2func(varargin{1});
+end
+
+if nargout
+    [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
+else
+    gui_mainfcn(gui_State, varargin{:});
+end
+% End initialization code - DO NOT EDIT
+
+
+% --- Executes just before Browse is made visible.
+function Browse_OpeningFcn(h, eventdata, handles, varargin)
+% This function has no output args, see OutputFcn.
+% h    handle to figure
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% varargin   command line arguments to Browse (see VARARGIN)
+
+% Choose default command line output for Browse
+handles.output = h;
+
+% Update handles structure
+guidata(h, handles);
+
+% UIWAIT makes Browse wait for user response (see UIRESUME)
+% uiwait(handles.Browser);
+
+
+% --- Outputs from this function are returned to the command line.
+function varargout = Browse_OutputFcn(h, eventdata, handles)
+varargout{1} = handles.output;
+
+%------------------------------------------------------------------------------    
+
+function pushbutton1_Callback(h, eventdata, handles)
+
+% pathname1=getappdata(handles.Browser,'pathname1');
+% filename1=getappdata(handles.Browser,'filename1');
+% set(findobj(0,'Tag','popupmenu9'),'String',);
+% set(findobj(0,'Tag','popupmenu10'),'String',1);
+% set(findobj(0,'Tag','popupmenu11'),'String',1);
+pathname2=getappdata(handles.Browser,'pathname2');
+filename2=getappdata(handles.Browser,'filename2');
+% if ~isfield(handles.Browser,'filename1')|getfield(handles.Browser,'filename1')==0;
+%     msgbox('Enter the Reference File','Error','error');
+%     return
+% end
+% if ~isfield(handles.Browser,'filename2')|getfield(handles.Browser,'filename2')==0;
+%     msgbox('Enter the Delay File','Error','error');
+%     return
+% end
+% ext1=filename1(:,end-2:end);
+ext2=filename2(:,end-2:end);
+
+if(ext2=='avi')
+ 
+%     info1=aviinfo([pathname1,filename1]);
+%     NumFrames1=[1:info1.NumFrames]';
+    info2=aviinfo([pathname2,filename2]);
+    NumFrames2=[1:info2.NumFrames]';
+    set(findobj(0,'Tag','popupmenu9'),'Max',info2.NumFrames);
+    set(findobj(0,'Tag','popupmenu9'),'String',[NumFrames2(1:end,:)]);
+    set(findobj(0,'Tag','popupmenu10'),'String',[NumFrames2(1:end,:)]);
+    set(findobj(0,'Tag','popupmenu11'),'String',[NumFrames2(1:end,:)]);
+    set(findobj(0,'Tag','popupmenu12'),'String',[1:30]);
+
+    mov2=aviread([pathname2,filename2],1:2);
+
+    [images2{1:2}]=deal(mov2.cdata);
+
+    if isrgb(images2{1})
+        images2{1}=im2double(rgb2gray(images2{1}));
+        images2{2}=im2double(rgb2gray(images2{2}));
+    end
+   
+    setappdata(handles.Browser,'NumFrames2',NumFrames2);
+else
+    filename2=getappdata(handles.Browser,'filename2');
+    [a1,a2]=ReadImg(pathname1,filename2,filename2);
+    images{a1,a2};
+end
+
+setappdata(handles.Browser,'Images2',images2);
+uiresume;
+     
+%--------------------------------------------------------------------------   
+    
+
+
+function pushbutton2_Callback(h, eventdata, handles)
+close(Browse);
+
+function edit1_CreateFcn(h, eventdata, handles)
+
+if ispc
+    set(h,'BackgroundColor','white');
+else
+    set(h,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
+end
+
+
+
+function edit1_Callback(h, eventdata, handles)
+
+%--------------------------------------------------------------------------  
+
+function edit2_CreateFcn(h, eventdata, handles)
+if ispc
+    set(h,'BackgroundColor','white');
+else
+    set(h,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
+end
+
+%--------------------------------------------------------------------------    
+
+
+function edit2_Callback(h, eventdata, handles)
+%--------------------------------------------------------------------------
+
+function pushbutton4_Callback(h, eventdata, handles)
+[filename2,pathname2]=uigetfile('*.avi','ImageFile Selection');
+set(handles.edit2,'String',[filename2]);
+set(handles.text7,'string',[pathname2]);
+set(handles.pushbutton1,'Enable','on');
+setappdata(handles.Browser,'filename2',[filename2]);
+setappdata(handles.Browser,'pathname2',[pathname2]);
+%--------------------------------------------------------------------------
+
